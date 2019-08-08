@@ -1,19 +1,19 @@
 #!/usr/bin/env python3
-
 """
 Title: scan.py
 Author: PiningNorwegianBlue
 Date: August 1st, 2019
 """
-
 import nmap
 import argparse
 from termcolor import colored
 import asyncio
 import time
+import threading
+import os
 
 
-async def _nmap_scan(target, port):
+async def scan(target, port):
     """
     Nmap module is using the -sC and -sV options for scanning
     :param target:  The IP address to scan
@@ -39,7 +39,9 @@ async def _nmap_scan(target, port):
         if service_name == "ssh":  # Actions that only work with information received from the SSH service
             hostkey = nscan[target]["tcp"][int(port)]["script"]["ssh-hostkey"]
             print(colored("{}\n".format(hostkey), "magenta"))
-            with open("hosts.txt", "r") as r:
+            path = "./hosts.txt"
+            mode = "a+" if os.path.exists(path) else os.mknod(path)
+            with open(path, "r+") as r:
                 """
                 Opens or creates the hosts.txt file in read mode, checks the addresses (if any).
                 Changes the value of append to False if address is found.
@@ -62,7 +64,7 @@ async def _nmap_scan(target, port):
 
     else:
         print("-" * 100)
-        print(colored("[-] Host: {}\t Port: {:>3} - Service: {:10}\tState: {:>5}".format
+        print(colored("[-] Host: {}\t Port: {:>3}\t - Service: {:10}\tState: {:>5}".format
                       (target,
                        port,
                        service_name,
@@ -70,7 +72,20 @@ async def _nmap_scan(target, port):
                       "red"))
 
 
+def maker(target, sport, eport):
+    try:
+        if eport:
+            port_range = range(sport, eport +1)
+            for port in port_range:
+                asyncio.run(scan(target, str(port)))
+        else:
+            asyncio.run(scan(target, str(sport)))
+    except Exception as e:
+        print(e)
+
+
 def main():
+    start_time = time.time()
     """
     Argument parser. Threading is implemented if more than one host or a range of ports is defined
     :return:
@@ -92,22 +107,12 @@ def main():
                         help="Specify an optional end port to scan for range.")
     args = parser.parse_args()
     targets = str(args.target).split(",")
-    # Will use threading if more than one port is specified
-    loop = asyncio.get_event_loop()
     sport = args.port
     eport = args.range
-    start_time = time.time()
+
     for t in targets:
-            if args.range:  # Create a port range to scan only if -r option is used
-                port_range = range(sport, eport + 1)
-                try:
-                    for port in port_range:
-                        loop.run_until_complete(_nmap_scan(t, str(port)))
-                except Exception as e:
-                    print(e)
-            else:
-                loop.run_until_complete(_nmap_scan(t, str(sport)))
-    loop.close()
+        thread = threading.Thread(target=maker, args=(t, sport, eport))
+        thread.start()
     print(time.time() - start_time)
 
 
