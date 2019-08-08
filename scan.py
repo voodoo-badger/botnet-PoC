@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+
 """
-Title: MaScanMan.py
+Title: scan.py
 Author: PiningNorwegianBlue
 Date: August 1st, 2019
 """
@@ -9,16 +9,16 @@ Date: August 1st, 2019
 import nmap
 import argparse
 from termcolor import colored
-from threading import *
-screen_lock = Semaphore(value=1)
+import asyncio
+import time
 
 
-def _nmap_scan(target, port):
+async def _nmap_scan(target, port):
     """
     Nmap module is using the -sC and -sV options for scanning
-    :param target:
-    :param port:     #print(nscan.scan(target, port, arguments="-sC -sV"))
-    :return:
+    :param target:  The IP address to scan
+    :param port:    The port to scan
+    :return:        Status and information about the running service
     """
     nscan = nmap.PortScanner()
     nscan.scan(target, port, arguments="-sC -sV")
@@ -26,83 +26,89 @@ def _nmap_scan(target, port):
     service_name = nscan[target]["tcp"][int(port)]["name"]
     product = nscan[target]["tcp"][int(port)]["product"]
     version = nscan[target]["tcp"][int(port)]["version"]
-    try:
-        if state == "open":
-            screen_lock.acquire()
-            print("-" * 50)
-            print(colored("[+] Host: {} Port: {}\t {} version {}\tState: {}".format
-                          (target,
-                           port,
-                           product,
-                           version,
-                           state),
-                          "green"))
-            screen_lock.release()
+    if state == "open":
+        print("-" * 100)
+        print(colored("[+] Host: {} Port: {:>3}\t {} version {:>10}\tState: {:>5}".format
+                      (target,
+                       port,
+                       product,
+                       version,
+                       state),
+                      "green"))
 
-            if service_name == "ssh":
-                # Printing banner information
-                hostkey = nscan[target]["tcp"][int(port)]["script"]["ssh-hostkey"]
-                screen_lock.acquire()
-                print(colored(" {}\n".format(hostkey), "magenta"))
-                screen_lock.release()
-                with open("hosts.txt", "r") as r:
-                    append = True
-                    for item in r.readlines():
-                        if target in item:
-                            append = False
-                    if append:
-                        with open("hosts.txt", "a+") as w:
-                            w.seek(0)
-                            w.write("{}".format(target))
-                            w.write("\n")
-            elif service_name == "http":
-                # Printing banner information
-                title = nscan[target]["tcp"][int(port)]["script"]["http-title"]
-                screen_lock.acquire()
-                print(colored("\t{}\n".format(title), "magenta"))
-                screen_lock.release()
-            else:
-                return
-
+        if service_name == "ssh":  # Actions that only work with information received from the SSH service
+            hostkey = nscan[target]["tcp"][int(port)]["script"]["ssh-hostkey"]
+            print(colored("{}\n".format(hostkey), "magenta"))
+            with open("hosts.txt", "r") as r:
+                """
+                Opens or creates the hosts.txt file in read mode, checks the addresses (if any).
+                Changes the value of append to False if address is found.
+                Appends the address to hosts.txt if append still True after file is read.
+                """
+                append = True
+                for item in r.readlines():
+                    if target in item:
+                        append = False
+                if append:
+                    with open("hosts.txt", "a+") as w:
+                        w.seek(0)
+                        w.write("{}".format(target))
+                        w.write("\n")
+        elif service_name == "http":  # This could be skipped entirely and may be omitted in the final version
+            title = nscan[target]["tcp"][int(port)]["script"]["http-title"]
+            print(colored("\t{}\n".format(title), "magenta"))
         else:
-            screen_lock.acquire()
-            print("-" * 50)
-            print(colored("[-] Host: {} Port: {}\t Service: {}\tState: {}".format
-                          (target,
-                           port,
-                           service_name,
-                           state),
-                          "red"))
-    except Exception as e:
-        print(e)
-    finally:
-        screen_lock.release()
+            return
+
+    else:
+        print("-" * 100)
+        print(colored("[-] Host: {}\t Port: {:>3} - Service: {:10}\tState: {:>5}".format
+                      (target,
+                       port,
+                       service_name,
+                       state),
+                      "red"))
 
 
 def main():
+    """
+    Argument parser. Threading is implemented if more than one host or a range of ports is defined
+    :return:
+    """
     parser = argparse.ArgumentParser()
-    parser.add_argument("-t", "--target", dest="target", type=str,
+    parser.add_argument("-t", "--target",
+                        dest="target",
+                        type=str,
                         help="Specify target host or hosts separated by comma.")
-    parser.add_argument("-p", "--port", dest="port", type=str,
-                        help="Specify target port or ports separated by comma.")
+    parser.add_argument("-p", "--port",
+                        dest="port",
+                        type=int,
+                        help="Specify target port.")
+    parser.add_argument("-r", "--range",
+                        dest="range",
+                        type=int,
+                        required=False,
+                        default=False,
+                        help="Specify an optional end port to scan for range.")
     args = parser.parse_args()
     targets = str(args.target).split(",")
-    ports = str(args.port).split(",")
-    sport = int(ports[0])
-
     # Will use threading if more than one port is specified
-    try:
-        for t in targets:
-            try:
-                eport = int(ports[1])
+    loop = asyncio.get_event_loop()
+    sport = args.port
+    eport = args.range
+    start_time = time.time()
+    for t in targets:
+            if args.range:  # Create a port range to scan only if -r option is used
                 port_range = range(sport, eport + 1)
-                for port in port_range:
-                    thread = Thread(target=_nmap_scan, args=(t, str(port)))
-                    thread.start()
-            except IndexError:
-                _nmap_scan(t, str(sport))
-    except IndexError:
-        _nmap_scan(targets, str(sport))
+                try:
+                    for port in port_range:
+                        loop.run_until_complete(_nmap_scan(t, str(port)))
+                except Exception as e:
+                    print(e)
+            else:
+                loop.run_until_complete(_nmap_scan(t, str(sport)))
+    loop.close()
+    print(time.time() - start_time)
 
 
 if __name__ == "__main__":
