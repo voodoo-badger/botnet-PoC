@@ -8,7 +8,6 @@ import nmap
 import argparse
 from termcolor import colored
 import asyncio
-import time
 import threading
 import os
 
@@ -85,7 +84,6 @@ def maker(target, sport, eport):
 
 
 def main():
-    start_time = time.time()
     """
     Argument parser. Threading is implemented if more than one host or a range of ports is defined
     :return:
@@ -113,7 +111,6 @@ def main():
     for t in targets:
         thread = threading.Thread(target=maker, args=(t, sport, eport))
         thread.start()
-    print(time.time() - start_time)
 
 
 if __name__ == "__main__":
