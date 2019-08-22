@@ -1,12 +1,5 @@
 #!/usr/bin/python3
-# -*- coding: utf-8 -*-
-
 from pexpect import pxssh
-from threading import *
-import asyncio
-
-maxConnect = 5
-connectionLock = BoundedSemaphore(value=maxConnect)
 
 
 class Bot:

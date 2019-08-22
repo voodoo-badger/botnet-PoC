@@ -1,7 +1,5 @@
 from pexpect import pxssh
-from threading import *
 import os
-screen_lock = Semaphore(value=1)
 
 
 class Bot:
