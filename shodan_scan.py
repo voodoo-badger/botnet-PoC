@@ -1,3 +1,10 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Name: shodan_scan.py
+Author: PiningNorwegianBlue
+Date: August 5th, 2019
+"""
 import shodan
 import os
 from termcolor import colored
@@ -11,9 +18,10 @@ path_to_api = "./shodan_api_key.txt"
 
 
 def scan(api, verbose=False):
-    api = shodan.Shodan(api)
+    api = shodan.Shodan(api)  # Api key issued to shodan.io
     try:
-        results = api.search("ssh")
+        results = api.search("ssh")  # Search term issued to shodan.io
+        #  Writes results to shodan_results.txt
         path = "./shodan_results.txt"
         mode = "a+" if os.path.exists(path) else os.mknod(path)
         for result in results["matches"]:
@@ -27,8 +35,8 @@ def scan(api, verbose=False):
                 if append:
                     with open(path, "a+") as wr:
                         wr.write("{},{}\n".format(ip, port))
+            # Print IP address and company name, city/country to screen if verbose
             if verbose:
-                # IP address and data
                 print(colored("+ IP: {:<} - Port: {}".format(
                     ip,
                     port),
