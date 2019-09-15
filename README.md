@@ -4,6 +4,7 @@ The goal is to automate the entire process of scanning a host, testing default c
 The end result is intended for educational purposes only.
 
 How to use:
+
 Optional:
 	1: To avoid conflicts it is advised to create a virtual environment by running "python3 -m venv <path-to>/<virtual_environment>".
 	2: source <path-to>/<virtual_environment>/bin/activate
@@ -11,7 +12,7 @@ Optional:
 Mandatory:
 	1: Install requirements by running "pip install -r requirements.txt" or "pip3 install -r requirements.txt" if there are different pip versions on your system.
 
-
+```
 Usage: initialize.py [-h] [-s SCAN] [-S] [-b] [-c] [-v]
 
 optional arguments:
@@ -22,3 +23,4 @@ optional arguments:
   -c, --control         Use verified credentials and hosts to start the
                         Command and Control central
   -v, --verbose         Print results from selected actions
+```
