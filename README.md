@@ -5,12 +5,10 @@ The end result is intended for educational purposes only.
 
 How to use:
 
-In a virtual environment:
-	1: To avoid conflicts it is advised to create a virtual environment by running ```python3 -m venv <path_to>/<virtual_environment>```
-	2: ```source <path-to>/<virtual_environment>/bin/activate```
-
-Mandatory:
-	1: Install requirements by running ```pip install -r requirements.txt``` or ```pip3 install -r requirements.txt``` if there are different pip versions on your system.
+In a virtual environment (Steps 1 and 2 are optional):
+1. Create the virtual environment: ```python3 -m venv <path_to>/<virtual_environment>```
+2. Activate the virtual environment: ```source <path-to>/<virtual_environment>/bin/activate```
+3. Install requirements: ```pip install -r requirements.txt``` or ```pip3 install -r requirements.txt``` if there are different pip versions on your system.
 
 ```
 Usage: initialize.py [-h] [-s SCAN] [-S] [-b] [-c] [-v]
