@@ -3,9 +3,8 @@
 The goal is to automate the entire process of scanning a host, testing default credentials and if successful, add the address, username, and password to a list used for a simple ssh botnet. Two methods of scanning are present - Using shodan.io (Requires private API key) or a python script using the nmap module defaulting to scanning port 22 and 2222.
 The end result is intended for educational purposes only.
 
-How to use:
+How to use (Steps 1 and 2 are optional but recommended):
 
-In a virtual environment (Steps 1 and 2 are optional):
 1. Create the virtual environment: ```python3 -m venv <path_to>/<virtual_environment>```
 2. Activate the virtual environment: ```source <path-to>/<virtual_environment>/bin/activate```
 3. Install requirements: ```pip install -r requirements.txt``` or ```pip3 install -r requirements.txt``` if there are different pip versions on your system.
