@@ -6,11 +6,11 @@ The end result is intended for educational purposes only.
 How to use:
 
 Optional:
-	1: To avoid conflicts it is advised to create a virtual environment by running "python3 -m venv <path-to>/<virtual_environment>".
-	2: source <path-to>/<virtual_environment>/bin/activate
+	1: To avoid conflicts it is advised to create a virtual environment by running ```python3 -m venv <path-to>/<virtual_environment>```
+	2: ```source <path-to>/<virtual_environment>/bin/activate```
 
 Mandatory:
-	1: Install requirements by running "pip install -r requirements.txt" or "pip3 install -r requirements.txt" if there are different pip versions on your system.
+	1: Install requirements by running ```pip install -r requirements.txt``` or ```pip3 install -r requirements.txt``` if there are different pip versions on your system.
 
 ```
 Usage: initialize.py [-h] [-s SCAN] [-S] [-b] [-c] [-v]
