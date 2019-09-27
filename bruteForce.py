@@ -36,9 +36,10 @@ def login_ssh(host, cred):
                     mode = "a+" if os.path.exists(path) else os.mknod(path)
                     with open(path, "r+") as r:
                         """
-                        Opens or creates the hosts.txt file in read mode, checks the addresses (if any).
-                        Changes the value of append to False if address is found.
-                        Appends the address to hosts.txt if append still True after file is read.
+                        1. Opens or creates the hosts.txt file in read mode.
+                        2. Checks the addresses (if any).
+                        3. Changes the value of append to False if address is found.
+                        4. Appends the address to hosts.txt if append is True.
                         """
                         append = True
                         for item in r.readlines():
