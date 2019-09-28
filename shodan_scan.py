@@ -58,8 +58,9 @@ def scan(api, verbose=False):
 def main(verbose):
     try:
         with open(path_to_api, "r") as key:
-            SHODAN_API_KEY = key.readlines()
+            SHODAN_API_KEY = key.readline().strip("\n")
             scan(SHODAN_API_KEY, verbose)
+    except FileNotFoundError:
+        print("Create the {} file and and populate it with your shodan.io API key".format(path_to_api))
     except Exception as e:
         print(e)
-        print("Create the {} file and and populate it with your shodan.io API key".format(path_to_api))
